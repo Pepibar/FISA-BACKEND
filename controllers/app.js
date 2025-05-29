@@ -5,34 +5,26 @@ async function crearSolicitud(req, res) {
     const {
       monto,
       plazomeses,
-      fechasolicitud,
+      historialcrediticio,
       usuariosid,
       edad,
-      genero,
-      educacion,
+      deudasmensuales,
       ingresos,
+      tipodeingresos,
       añosexp,
-      vivienda,
-      proposito,
-      interes,
-      duracionprestamos
     } = req.body;
 
     const query = `
       INSERT INTO public.solicitantes (
         monto,
         plazomeses,
-        fechasolicitud,
+        historialcrediticio,
         usuariosid,
         edad,
-        genero,
-        educacion,
+        deudasmensuales,
         ingresos,
+        tipodeingresos,
         añosexp,
-        vivienda,
-        proposito,
-        interes,
-        duracionprestamos
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
@@ -41,17 +33,13 @@ async function crearSolicitud(req, res) {
     const values = [
       monto,
       plazomeses,
-      fechasolicitud,
+      historialcrediticio,
       usuariosid,
       edad,
-      genero,
-      educacion,
+      deudasmensuales,
       ingresos,
+      tipodeingresos,
       añosexp,
-      vivienda,
-      proposito,
-      interes,
-      duracionprestamos
     ];
 
     const resultado = await pool.query(query, values);
@@ -63,6 +51,8 @@ async function crearSolicitud(req, res) {
   }
 }
 
-module.exports = {
-  crearSolicitud
+const solicitudes = {
+crearSolicitud
 };
+
+export default solicitudes
