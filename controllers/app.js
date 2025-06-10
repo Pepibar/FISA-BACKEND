@@ -5,26 +5,50 @@ async function crearSolicitud(req, res) {
     const {
       monto,
       plazomeses,
+<<<<<<< HEAD
       historialcrediticio,
       usuariosid,
       edad,
       deudasmensuales,
+=======
+      usuariosid,
+      edad,
+>>>>>>> 92bcb691df6aad0d20b10b2c24a6f05f14cbf4d7
       ingresos,
       tipodeingresos,
       añosexp,
+<<<<<<< HEAD
+=======
+      tipodeingreso,
+      interes,
+      deudasmensuales,
+      historialcrediticio
+>>>>>>> 92bcb691df6aad0d20b10b2c24a6f05f14cbf4d7
     } = req.body;
 
     const query = `
       INSERT INTO public.solicitantes (
         monto,
         plazomeses,
+<<<<<<< HEAD
         historialcrediticio,
         usuariosid,
         edad,
         deudasmensuales,
+=======
+        usuariosid,
+        edad,
+>>>>>>> 92bcb691df6aad0d20b10b2c24a6f05f14cbf4d7
         ingresos,
         tipodeingresos,
         añosexp,
+<<<<<<< HEAD
+=======
+        tipodeingreso,
+        interes,
+        deudasmensuales,
+        historialcrediticio
+>>>>>>> 92bcb691df6aad0d20b10b2c24a6f05f14cbf4d7
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
@@ -33,13 +57,25 @@ async function crearSolicitud(req, res) {
     const values = [
       monto,
       plazomeses,
+<<<<<<< HEAD
       historialcrediticio,
       usuariosid,
       edad,
       deudasmensuales,
+=======
+      usuariosid,
+      edad,
+>>>>>>> 92bcb691df6aad0d20b10b2c24a6f05f14cbf4d7
       ingresos,
       tipodeingresos,
       añosexp,
+<<<<<<< HEAD
+=======
+      tipodeingreso,
+      interes,
+      deudasmensuales,
+      historialcrediticio
+>>>>>>> 92bcb691df6aad0d20b10b2c24a6f05f14cbf4d7
     ];
 
     const resultado = await pool.query(query, values);
