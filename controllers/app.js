@@ -15,7 +15,7 @@ async function crearSolicitud(req, res) {
     } = req.body;
 
     const query = `
-      INSERT INTO public.solicitantes (
+      INSERT INTO public.solicitudesprestamos (
         monto,
         plazomeses,
         historialcrediticio,
