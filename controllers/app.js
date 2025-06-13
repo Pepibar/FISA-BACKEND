@@ -43,16 +43,19 @@ async function crearSolicitud(req, res) {
     ];
 
     const resultado = await pool.query(query, values);
-    res.status(201).json({ mensaje: 'Solicitud creada', solicitud: resultado.rows[0] });
 
+    res.status(201).json({
+      mensaje: "Solicitud creada",
+      solicitud: resultado.rows[0],
+    });
   } catch (error) {
-    console.error('Error al crear solicitud:', error);
-    res.status(500).json({ error: 'Error al crear solicitud' });
+    console.error("Error al crear solicitud:", error);
+    res.status(500).json({ error: "Error al crear solicitud" });
   }
 }
 
 const solicitudes = {
-  crearSolicitud
+  crearSolicitud,
 };
 
 export default solicitudes;
