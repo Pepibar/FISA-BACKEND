@@ -1,4 +1,4 @@
-import pool from '../neon.js';
+import pool from "../neon.js";
 
 async function crearSolicitud(req, res) {
   try {
@@ -21,12 +21,12 @@ async function crearSolicitud(req, res) {
         historialcrediticio,
         usuariosid,
         edad,
-        deudasmensuales,
         ingresos,
         tipodeingresos,
         añosexp,
+        deudasmensuales
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *;
     `;
 
@@ -36,10 +36,10 @@ async function crearSolicitud(req, res) {
       historialcrediticio,
       usuariosid,
       edad,
-      deudasmensuales,
       ingresos,
       tipodeingresos,
       añosexp,
+      deudasmensuales,
     ];
 
     const resultado = await pool.query(query, values);
@@ -52,7 +52,7 @@ async function crearSolicitud(req, res) {
 }
 
 const solicitudes = {
-crearSolicitud
+  crearSolicitud
 };
 
-export default solicitudes
+export default solicitudes;
