@@ -2,6 +2,8 @@ import pool from "../neon.js";
 
 async function crearSolicitud(req, res) {
   try {
+    console.log("📩 Solicitud recibida:", req.body); // Esto es clave para ver si llega el request
+
     const {
       monto,
       plazomeses,
@@ -48,14 +50,15 @@ async function crearSolicitud(req, res) {
       mensaje: "Solicitud creada",
       solicitud: resultado.rows[0],
     });
+
   } catch (error) {
-    console.error("Error al crear solicitud:", error);
+    console.error("❌ Error al crear solicitud:", error);
     res.status(500).json({ error: "Error al crear solicitud" });
   }
 }
 
 const solicitudes = {
-  crearSolicitud,
+  crearSolicitud
 };
 
 export default solicitudes;
