@@ -19,7 +19,7 @@ async function crearSolicitud(req, res) {
       deudasmensuales,
     } = req.body;
 
-    // Preparar datos para enviar a la IA
+    
     const datosParaIA = {
       historial_crediticio: historialcrediticio,
       ingresos_mensuales: ingresos,
@@ -31,13 +31,13 @@ async function crearSolicitud(req, res) {
       años_trabajando: añosexp,
     };
 
-    // Llamar a la IA
+   
     const responseIA = await axios.post(IA_URL, datosParaIA);
     console.log("✅ Respuesta IA:", responseIA.data);
 
     const { resultado: apto, mensaje } = responseIA.data;
 
-    // Insertar en DB con respuesta IA
+   
     const query = `
       INSERT INTO public.solicitudesprestamos (
         monto,
