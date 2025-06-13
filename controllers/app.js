@@ -1,4 +1,4 @@
-const pool = require('../neon');
+import pool from '../neon.js';
 
 async function crearSolicitud(req, res) {
   try {
