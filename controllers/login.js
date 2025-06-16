@@ -10,7 +10,7 @@ app.use(cors());
 const register = async (req, res) => {
     const usuario = req.body;
 
-    if (!usuario.email || !usuario.password || !usuario.nombre || !usuario.apellido) {
+    if (!usuario.email || !usuario.contraseña || !usuario.nombre || !usuario.apellido) {
         return res.status(400).send('Todos los campos tienen que estar completos');
     }
 
@@ -21,16 +21,16 @@ const register = async (req, res) => {
         }
 
         const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(usuario.password, salt);
+        const hash = bcrypt.hashSync(usuario.contraseña, salt);
 
-        usuario.password = hash;
+        usuario.contraseña = hash;
 
         // Crear usuario en la DB (usando la propiedad correcta para password)
         const nuevoUsuario = await service.createUsuario({
             nombre: usuario.nombre,
             apellido: usuario.apellido,
             email: usuario.email,
-            password: usuario.password  // ojo, el service espera 'password' aunque en la DB es 'contraseña'
+            password: usuario.contraseña  // ojo, el service espera 'password' aunque en la DB es 'contraseña'
         });
 
         return res.json({
@@ -48,7 +48,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     const usuario = req.body;
 
-    if (!usuario.email || !usuario.password) {
+    if (!usuario.email || !usuario.contraseña) {
         return res.status(400).json({ message: "Debe proporcionar email y contraseña" });
     }
 
@@ -59,7 +59,7 @@ const login = async (req, res) => {
         }
 
         const passwordEnDB = usuario_db.contraseña;  // columna en DB se llama 'contraseña'
-        const secret = "nachitobarre";
+        const secret = process.env.JWT_SECRET;
 
         const comparison = bcrypt.compareSync(usuario.password, passwordEnDB);
 
