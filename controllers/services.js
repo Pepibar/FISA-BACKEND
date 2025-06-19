@@ -29,8 +29,8 @@ const getUsuarioById = async (id) => {
 const createUsuario = async (usuario) => {
     try {
         const { rows } = await pool.query(
-            "INSERT INTO usuarios (nombre, apellido, email, contraseña) VALUES ($1, $2, $3, $4) RETURNING *",
-            [usuario.nombre, usuario.apellido, usuario.email, usuario.contraseña]
+            "INSERT INTO usuarios (nombre, apellido, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
+            [usuario.nombre, usuario.apellido, usuario.email, usuario.password]
         );
         return rows[0];
     } catch (error) {
