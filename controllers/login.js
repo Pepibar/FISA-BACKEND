@@ -10,9 +10,9 @@ app.use(cors());
 const register = async (req, res) => {
     const usuario = req.body;
 
-  if (!usuario.email || !usuario.password || !usuario.nombre || !usuario.apellido) {
-  return res.status(400).send("Todos los campos tienen que estar completos");
-}
+    if (!usuario.email || !usuario.password || !usuario.nombre || !usuario.apellido) {
+        return res.status(400).send("Todos los campos tienen que estar completos");
+    }
 
     try {
         const usuario_email = await service.getUsuarioByEmail(usuario.email);
@@ -25,19 +25,28 @@ const register = async (req, res) => {
 
         usuario.password = hash;
 
-        // Crear usuario en la DB (usando la propiedad correcta para password)
         const nuevoUsuario = await service.createUsuario({
             nombre: usuario.nombre,
             apellido: usuario.apellido,
             email: usuario.email,
-            password: usuario.password 
+            password: usuario.password
         });
 
-        return res.json({
-            id: nuevoUsuario.usuariosid,
-            nombre: nuevoUsuario.nombre,
-            apellido: nuevoUsuario.apellido,
-            email: nuevoUsuario.email
+        const secret = process.env.JWT_SECRET;
+        const token = jwt.sign(
+            { usuariosid: nuevoUsuario.usuariosid },
+            secret,
+            { expiresIn: 30 * 60 }
+        );
+
+        return res.status(201).json({
+            token: token,
+            usuario: {
+                id: nuevoUsuario.usuariosid,
+                nombre: nuevoUsuario.nombre,
+                apellido: nuevoUsuario.apellido,
+                email: nuevoUsuario.email
+            }
         });
     } catch (error) {
         console.log(error);
@@ -64,7 +73,7 @@ const login = async (req, res) => {
         const comparison = bcrypt.compareSync(usuario.password, passwordEnDB);
 
         if (comparison) {
-            const token = jwt.sign({ userid: usuario_db.usuariosid }, secret, { expiresIn: 30 * 60 });
+            const token = jwt.sign({ usuariosid: usuario_db.usuariosid }, secret, { expiresIn: 30 * 60 });
 
             return res.status(200).json({
                 token: token,
