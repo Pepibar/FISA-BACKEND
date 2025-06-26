@@ -11,7 +11,6 @@ async function crearSolicitud(req, res) {
       monto,
       plazomeses,
       historialcrediticio,
-      usuariosid,
       edad,
       ingresos,
       tipodeingresos,
@@ -19,7 +18,8 @@ async function crearSolicitud(req, res) {
       deudasmensuales,
     } = req.body;
 
-    
+    const usuariosid = req.usuariosid;
+
     const datosParaIA = {
       historial_crediticio: historialcrediticio,
       ingresos_mensuales: ingresos,
