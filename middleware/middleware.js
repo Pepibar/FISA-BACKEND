@@ -44,3 +44,11 @@ export const verifyToken = async (req, res, next) => {
     return res.status(401).json({ message: "Token inválido o expirado" });
   }
 };
+export const authorizeRoles = (rolesPermitidos) => {
+  return (req, res, next) => {
+    if (!rolesPermitidos.includes(req.rol)) {
+      return res.status(403).json({ message: "Acceso no autorizado: rol insuficiente" });
+    }
+    next();
+  };
+};

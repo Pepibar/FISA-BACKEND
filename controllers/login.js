@@ -25,7 +25,6 @@ const register = async (req, res) => {
 
     usuario.password = hash;
 
-    // Por defecto rol 'usuario' si no viene rol explícito
     const rol = usuario.rol || 'usuario';
 
     const nuevoUsuario = await service.createUsuario({
@@ -33,7 +32,7 @@ const register = async (req, res) => {
       apellido: usuario.apellido,
       email: usuario.email,
       password: usuario.password,
-      rol,   // <-- guardamos el rol en DB
+      rol,   
     });
 
     return res.json({
