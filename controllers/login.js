@@ -70,7 +70,7 @@ const login = async (req, res) => {
 
         if (comparison) {
   const token = jwt.sign(
-    { usuariosid: usuario_db.usuariosid, rol: usuario_db.rol }, // agregamos rol aquí
+    { usuariosid: usuario_db.usuariosid, rol: usuario_db.rol }, 
     secret,
     { expiresIn: 30 * 60 }
   );
