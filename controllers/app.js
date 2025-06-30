@@ -1,6 +1,6 @@
 import axios from 'axios';
 import pool from "../neon.js";
-import enviarMail from '../services/mailer.js';
+import enviarMail from "../emails.js";
 
 const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo";
 
