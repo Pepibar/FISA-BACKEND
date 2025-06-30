@@ -3,6 +3,7 @@ import cors from 'cors';
 import solicitudes from './controllers/app.js';
 import usuario from './controllers/login.js';
 import { verifyToken, authorizeRoles } from './middleware/middleware.js';
+import service from './controllers/services.js';
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.get('/admin/dashboard', verifyToken, authorizeRoles(['admin']), (req, res) =
   res.json({ message: "Bienvenido admin" });
 });
 
-app.get('/solicitudeshechas', verifyToken, authorizeRoles(['usuario', 'admin']), solicitudes.obtenerSolicitudesUsuario);
+app.get('/solicitudeshechas', verifyToken, authorizeRoles(['usuario', 'admin']), service.getSolicitudesByUsuarioId);
 
 app.get('/', (req, res) => {
   res.send('API de FISA funcionando correctamente ✅');
