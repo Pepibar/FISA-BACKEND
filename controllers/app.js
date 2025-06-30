@@ -1,6 +1,6 @@
 import axios from 'axios';
 import pool from "../neon.js";
-import enviarMail from "../emails.js";
+import enviarMail from '../emails.js';
 
 const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo";
 
@@ -73,7 +73,7 @@ async function crearSolicitud(req, res) {
 
     const resultado = await pool.query(query, values);
 
-    // ✅ Enviar correo al usuario
+    
     await enviarMail(
       emailUsuario,
       "Resultado de tu solicitud de préstamo - FISA",

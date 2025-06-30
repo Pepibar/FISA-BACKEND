@@ -28,3 +28,5 @@ export async function sendEmail({ to, subject, text, html }) {
     console.error("Error enviando email:", error);
   }
 }
+
+export default enviarMail;
