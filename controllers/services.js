@@ -1,5 +1,34 @@
 import pool from "../neon.js";
 
+
+const obtenerSolicitudesUsuario = async (req, res) => {
+  try {
+    const usuariosid = req.usuariosid;
+
+
+    const query = `
+      SELECT * FROM public.solicitudesprestamos
+      WHERE usuariosid = $1
+      ORDER BY solicitudid DESC;
+    `;
+
+
+    const result = await pool.query(query, [usuariosid]);
+
+
+    res.status(200).json({
+      mensaje: "Solicitudes encontradas",
+      solicitudes: result.rows,
+    });
+
+
+  } catch (error) {
+    console.error("❌ Error obteniendo solicitudes:", error.message);
+    res.status(500).json({ error: "Error al obtener las solicitudes" });
+  }
+}
+
+
 const getUsuarioByEmail = async (email) => {
     try {
         const { rows } = await pool.query(
@@ -12,6 +41,7 @@ const getUsuarioByEmail = async (email) => {
         throw error;
     }
 };
+
 
 const getUsuarioById = async (id) => {
     try {
@@ -26,6 +56,7 @@ const getUsuarioById = async (id) => {
     }
 };
 
+
 const createUsuario = async (usuario) => {
     try {
         const { rows } = await pool.query(
@@ -38,10 +69,13 @@ const createUsuario = async (usuario) => {
     }
 };
 
-const service = { 
-    getUsuarioByEmail, 
-    getUsuarioById, 
-    createUsuario 
+
+const service = {
+    getUsuarioByEmail,
+    getUsuarioById,
+    createUsuario,
+    obtenerSolicitudesUsuario
 };
+
 
 export default service;
