@@ -20,22 +20,12 @@ async function crearSolicitud(req, res) {
 
     const usuariosid = req.usuariosid;
 
-    const datosParaIA = {
-      historial_crediticio: historialcrediticio,
-      ingresos_mensuales: ingresos,
-      deudas_mensuales: deudasmensuales,
-      monto_prestamo: monto,
-      plazo_meses: plazomeses,
-      edad: edad,
-      tipo_ingreso: tipodeingresos,
-      años_trabajando: añosexp,
+  const responseIA = {
+      data: {
+        resultado: true,  // o false para probar rechazo
+        mensaje: "Simulación: préstamo aprobado",
+      }
     };
-
-   
-    const responseIA = await axios.post(IA_URL, datosParaIA);
-    console.log("✅ Respuesta IA:", responseIA.data);
-
-    const { resultado: apto, mensaje } = responseIA.data;
 
    
     const query = `
@@ -73,16 +63,17 @@ async function crearSolicitud(req, res) {
     const resultado = await pool.query(query, values);
 
     res.status(201).json({
-      mensaje: "Solicitud creada y analizada por IA",
+      mensaje: "Solicitud creada y analizada (simulada) por IA",
       solicitud: resultado.rows[0],
       resultadoIA: responseIA.data,
     });
 
   } catch (error) {
     console.error("❌ Error en crearSolicitud:", error.message);
-    res.status(500).json({ error: "Error al crear solicitud o comunicarse con la IA" });
+    res.status(500).json({ error: "Error al crear solicitud" });
   }
 }
+
 
 const solicitudes = {
   crearSolicitud,
