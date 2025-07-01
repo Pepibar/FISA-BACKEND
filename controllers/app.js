@@ -33,11 +33,18 @@ async function crearSolicitud(req, res) {
       años_trabajando: añosexp,
     };
 
-    
-    const responseIA = await axios.post(IA_URL, datosParaIA);
-    console.log("✅ Respuesta IA:", responseIA.data);
+    let apto, mensaje;
 
-    const { resultado: apto, mensaje } = responseIA.data;
+    try {
+      const responseIA = await axios.post(IA_URL, datosParaIA);
+      apto = responseIA.data.resultado;
+      mensaje = responseIA.data.mensaje;
+      console.log("✅ Respuesta IA:", responseIA.data);
+    } catch (error) {
+      console.warn("⚠️ IA caída, usando resultado simulado");
+      apto = false; // Cambia a true para probar aprobación
+      mensaje = "Resultado simulado: IA no disponible.";
+    }
 
     const query = `
       INSERT INTO public.solicitudesprestamos (
