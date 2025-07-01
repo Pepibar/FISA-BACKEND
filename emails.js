@@ -15,9 +15,9 @@ async function enviarMail(to, subject, html) {
 
   const mailOptions = {
     from: `"FISA" <${process.env.SMTP_USER}>`,
-    to: to,
-    subject: subject,
-      html: contenidoHTML,
+    to,
+    subject,
+    html,
   };
 
   return transporter.sendMail(mailOptions);
