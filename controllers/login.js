@@ -92,10 +92,48 @@ const login = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
+const forgetpassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await service.getUsuarioByEmail(email);
+  if (!user) {
+    return res.status(404).json({ message: "Usuario no encontrado" });
+  }
+
+  const token = jwt.sign({ id: user.usuariosid }, process.env.JWT_SECRET, {
+    expiresIn: '15m', // Token válido por 15 minutos
+  });
+
+  const link = `https://fisa-backend.vercel.app/reset-password?token=${token}`;
+
+  const html = `
+    <div style="font-family: Arial; padding: 20px; border: 2px solid #a259ff; border-radius: 10px;">
+      <h2 style="color:#a259ff;">Recuperación de contraseña 🔑</h2>
+      <p>Hola ${user.nombre}, recibimos una solicitud para restablecer tu contraseña.</p>
+      <p>Hacé clic en el siguiente botón para continuar:</p>
+      <a href="${link}" 
+         style="padding: 10px 20px; background-color: #a259ff; color: white; 
+                text-decoration: none; border-radius: 5px;">
+         Cambiar contraseña
+      </a>
+      <p style="margin-top:20px;">Si no solicitaste este cambio, ignorá este correo.</p>
+      <hr/>
+      <p>FISA - Financial Intelligence for Smart Approval</p>
+    </div>
+  `;
+
+  await enviarMail(email, "Recuperá tu contraseña", html);
+
+  res.json({ message: "Email enviado con el enlace para recuperar la contraseña" });
+};
+
+
 
 const usuario = {
   login,
   register,
+ forgetpassword,
+  
 };
 
 export default usuario;
