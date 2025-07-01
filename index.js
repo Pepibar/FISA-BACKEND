@@ -4,6 +4,7 @@ import solicitudes from './controllers/app.js';
 import usuario from './controllers/login.js';
 import { verifyToken, authorizeRoles } from './middleware/middleware.js';
 import service from './controllers/services.js';
+import testSMTP from './prueba.js';
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(express.json());
 
 app.post('/solicitudes', verifyToken, authorizeRoles(['usuario', 'admin']), solicitudes.crearSolicitud);
 
-
+app.post('/prueba', testSMTP);
 app.post('/register', usuario.register);
 app.post('/login', usuario.login);
 
