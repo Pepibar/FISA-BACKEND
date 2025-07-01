@@ -101,27 +101,30 @@ if (!emailUsuario || typeof emailUsuario !== "string" || emailUsuario.trim() ===
       await enviarMail(
         emailUsuario,
         "Resultado de tu solicitud de préstamo - FISA",
-  `
-  Hola 👋,
+    `
+      <h2>Hola 👋</h2>
+      <p>Tu solicitud de préstamo fue procesada.</p>
 
-  Tu solicitud de préstamo fue procesada.
+      <p><strong>Resultado:</strong> ${apto ? "✅ Aprobada" : "❌ No Aprobada"}</p>
+      <p><strong>Motivo:</strong> ${mensaje}</p>
 
-  Resultado: ${apto ? "✅ Aprobada" : "❌ No Aprobada"}
-  Motivo: ${mensaje}
+      <h3>📄 Detalles de tu solicitud:</h3>
+      <ul>
+        <li><strong>Monto solicitado:</strong> $${monto}</li>
+        <li><strong>Plazo:</strong> ${plazomeses} meses</li>
+        <li><strong>Ingresos mensuales:</strong> $${ingresos}</li>
+        <li><strong>Deudas mensuales:</strong> $${deudasmensuales}</li>
+        <li><strong>Historial crediticio:</strong> ${historialcrediticio}</li>
+        <li><strong>Tipo de ingreso:</strong> ${tipodeingresos}</li>
+        <li><strong>Años de experiencia laboral:</strong> ${añosexp}</li>
+        <li><strong>Edad:</strong> ${edad} años</li>
+      </ul>
 
-  📄 Detalles de tu solicitud:
-  - Monto solicitado: $${monto}
-  - Plazo: ${plazomeses} meses
-  - Ingresos mensuales: $${ingresos}
-  - Deudas mensuales: $${deudasmensuales}
-  - Historial crediticio: ${historialcrediticio}
-  - Tipo de ingreso: ${tipodeingresos}
-  - Años de experiencia laboral: ${añosexp}
-  - Edad: ${edad} años
-
-  Gracias por confiar en FISA.
-  FISA - Financial Intelligence for Smart Approval
-  `);
+      <p>Gracias por confiar en FISA. Nuestro equipo te contactará si es necesario o podés responder a este correo para consultas.</p>
+      <hr/>
+      <p>FISA - Financial Intelligence for Smart Approval</p>
+    `
+  );
       console.log("📧 Email enviado a:", emailUsuario);
     } else {
       console.warn("⚠️ Email del usuario no definido. No se envió el mail.");
