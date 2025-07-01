@@ -72,35 +72,40 @@ async function crearSolicitud(req, res) {
     const resultado = await pool.query(query, values);
 
     
-    await enviarMail(
-      emailUsuario,
-      "Resultado de tu solicitud de préstamo - FISA",
-      `
-        <h2>Hola 👋</h2>
-        <p>Tu solicitud de préstamo fue procesada.</p>
+    if (emailUsuario) {
+      await enviarMail(
+        emailUsuario,
+        "Resultado de tu solicitud de préstamo - FISA",
+        `
+          <h2>Hola 👋</h2>
+          <p>Tu solicitud de préstamo fue procesada.</p>
 
-        <p><strong>Resultado:</strong> ${
-          apto ? "✅ Aprobada" : "❌ No Aprobada"
-        }</p>
-        <p><strong>Motivo:</strong> ${mensaje}</p>
+          <p><strong>Resultado:</strong> ${
+            apto ? "✅ Aprobada" : "❌ No Aprobada"
+          }</p>
+          <p><strong>Motivo:</strong> ${mensaje}</p>
 
-        <h3>📄 Detalles de tu solicitud:</h3>
-        <ul>
-          <li><strong>Monto solicitado:</strong> $${monto}</li>
-          <li><strong>Plazo:</strong> ${plazomeses} meses</li>
-          <li><strong>Ingresos mensuales:</strong> $${ingresos}</li>
-          <li><strong>Deudas mensuales:</strong> $${deudasmensuales}</li>
-          <li><strong>Historial crediticio:</strong> ${historialcrediticio}</li>
-          <li><strong>Tipo de ingreso:</strong> ${tipodeingresos}</li>
-          <li><strong>Años de experiencia laboral:</strong> ${añosexp}</li>
-          <li><strong>Edad:</strong> ${edad} años</li>
-        </ul>
+          <h3>📄 Detalles de tu solicitud:</h3>
+          <ul>
+            <li><strong>Monto solicitado:</strong> $${monto}</li>
+            <li><strong>Plazo:</strong> ${plazomeses} meses</li>
+            <li><strong>Ingresos mensuales:</strong> $${ingresos}</li>
+            <li><strong>Deudas mensuales:</strong> $${deudasmensuales}</li>
+            <li><strong>Historial crediticio:</strong> ${historialcrediticio}</li>
+            <li><strong>Tipo de ingreso:</strong> ${tipodeingresos}</li>
+            <li><strong>Años de experiencia laboral:</strong> ${añosexp}</li>
+            <li><strong>Edad:</strong> ${edad} años</li>
+          </ul>
 
-        <p>Gracias por confiar en FISA. Nuestro equipo te contactará si es necesario o podés responder a este correo para consultas.</p>
-        <hr/>
-        <p>FISA - Financial Intelligence for Smart Approval</p>
-      `
-    );
+          <p>Gracias por confiar en FISA. Nuestro equipo te contactará si es necesario o podés responder a este correo para consultas.</p>
+          <hr/>
+          <p>FISA - Financial Intelligence for Smart Approval</p>
+        `
+      );
+      console.log("📧 Email enviado a:", emailUsuario);
+    } else {
+      console.warn("⚠️ Email del usuario no definido. No se envió el mail.");
+    }
 
     res.status(201).json({
       mensaje: "Solicitud creada con resultado simulado (IA caída)",
