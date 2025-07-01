@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import service from "./services.js";
 import dotenv from "dotenv";
+import enviarMail from "../emails.js";
 
 dotenv.config();
 const app = express();
@@ -104,7 +105,7 @@ const forgetpassword = async (req, res) => {
     expiresIn: '15m', // Token válido por 15 minutos
   });
 
-  const link = `https://fisa-backend.vercel.app/reset-password?token=${token}`;
+  const link = `https://fisa-backend.vercel.app/forgetpassword?token=${token}`;
 
   const html = `
     <div style="font-family: Arial; padding: 20px; border: 2px solid #a259ff; border-radius: 10px;">
