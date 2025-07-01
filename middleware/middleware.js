@@ -46,7 +46,10 @@ export const verifyToken = async (req, res, next) => {
 };
 export const authorizeRoles = (rolesPermitidos) => {
   return (req, res, next) => {
-    if (!rolesPermitidos.includes(req.rol)) {
+    
+    const userRole =  req.rol 
+
+    if (!rolesPermitidos.includes(userRole)) {
       return res.status(403).json({ message: "Acceso no autorizado: rol insuficiente" });
     }
     next();
