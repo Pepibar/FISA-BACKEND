@@ -37,6 +37,7 @@ export const verifyToken = async (req, res, next) => {
   
     req.usuariosid = usuariosid;
     req.userEmail = result.rows[0].email;
+    req.rol = result.rows[0].rol;  
     next();
 
   } catch (error) {
