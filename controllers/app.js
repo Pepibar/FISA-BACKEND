@@ -34,7 +34,7 @@ async function crearSolicitud(req, res) {
     }
 
     const usuariosid = req.usuariosid;
-    const emailUsuario = req.email;
+    const emailUsuario = req.userEmail;
 
     const datosParaIA = {
       historial_crediticio: historialcrediticio,
