@@ -1,9 +1,3 @@
-import jwt from "jsonwebtoken";
-import pool from "../neon.js";
-import dotenv from "dotenv";
-
-dotenv.config();
-
 export const verifyToken = async (req, res, next) => {
   const header_token = req.headers["authorization"];
   console.log("🔐 Token recibido:", header_token);
@@ -14,8 +8,7 @@ export const verifyToken = async (req, res, next) => {
 
   const tokenParts = header_token.split(" ");
   if (tokenParts[0] !== "Bearer" || tokenParts.length !== 2) {
-    console.log("❌ Formato del token no válido");
-    return res.status(400).json({ message: "Formato del token no válido" });
+    return res.status(400).json({ message: "Formato de token inválido" });
   }
 
   const token = tokenParts[1];
@@ -34,25 +27,14 @@ export const verifyToken = async (req, res, next) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-  
     req.usuariosid = usuariosid;
-    req.userEmail = result.rows[0].email;
-    req.rol = result.rows[0].rol;  
+    req.userEmail = result.rows[0].email;  // 🔥 🔥 Esto es clave
+    req.rol = result.rows[0].rol;          // 🔥 También para roles
+
     next();
 
   } catch (error) {
     console.error("❌ Error en verificación de token:", error.message);
     return res.status(401).json({ message: "Token inválido o expirado" });
   }
-};
-export const authorizeRoles = (rolesPermitidos) => {
-  return (req, res, next) => {
-    
-    const userRole =  req.rol 
-
-    if (!rolesPermitidos.includes(userRole)) {
-      return res.status(403).json({ message: "Acceso no autorizado: rol insuficiente" });
-    }
-    next();
-  };
 };

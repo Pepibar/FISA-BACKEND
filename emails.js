@@ -12,12 +12,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function enviarMail({ to, subject, text, html }) {
+async function enviarMail({ to, subject, html }) {
   const mailOptions = {
     from: `"FISA App" <${process.env.SMTP_USER}>`,
     to,
     subject,
-    text,
     html,
   };
 

@@ -19,6 +19,20 @@ async function crearSolicitud(req, res) {
       deudasmensuales,
     } = req.body;
 
+    // Validación básica
+    if (
+      !monto ||
+      !plazomeses ||
+      !historialcrediticio ||
+      !edad ||
+      !ingresos ||
+      !tipodeingresos ||
+      !añosexp ||
+      !deudasmensuales
+    ) {
+      return res.status(400).json({ error: "Faltan datos en la solicitud" });
+    }
+
     const usuariosid = req.usuariosid;
     const emailUsuario = req.userEmail;
 
@@ -33,9 +47,17 @@ async function crearSolicitud(req, res) {
       años_trabajando: añosexp,
     };
 
-  
-    const apto = true; // o false, según quieras simular aprobación o rechazo
-    const mensaje = "Resultado simulado: IA no disponible.";
+    let apto = false;
+    let mensaje = "Resultado simulado: IA no disponible.";
+
+    try {
+      const responseIA = await axios.post(IA_URL, datosParaIA);
+      apto = responseIA.data.resultado;
+      mensaje = responseIA.data.mensaje;
+      console.log("✅ Respuesta IA:", responseIA.data);
+    } catch (error) {
+      console.warn("⚠️ IA no disponible, usando resultado simulado");
+    }
 
     const query = `
       INSERT INTO public.solicitudesprestamos (
@@ -71,7 +93,7 @@ async function crearSolicitud(req, res) {
 
     const resultado = await pool.query(query, values);
 
-    
+    // Enviar email
     if (emailUsuario) {
       await enviarMail(
         emailUsuario,
@@ -108,9 +130,9 @@ async function crearSolicitud(req, res) {
     }
 
     res.status(201).json({
-      mensaje: "Solicitud creada con resultado simulado (IA caída)",
+      mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
-      resultadoIA: { resultado: apto, mensaje }
+      resultadoIA: { resultado: apto, mensaje },
     });
 
   } catch (error) {
