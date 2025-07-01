@@ -92,7 +92,7 @@ async function crearSolicitud(req, res) {
     ];
 
     const resultado = await pool.query(query, values);
-
+console.log("📨 Enviando email a:", emailUsuario);
     // Enviar email
     if (emailUsuario) {
       await enviarMail(

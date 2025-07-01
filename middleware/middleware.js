@@ -4,7 +4,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-
 export const verifyToken = async (req, res, next) => {
   const header_token = req.headers["authorization"];
   console.log("🔐 Token recibido:", header_token);
@@ -23,8 +22,10 @@ export const verifyToken = async (req, res, next) => {
   try {
     const secret = process.env.JWT_SECRET;
     const decoded = jwt.verify(token, secret);
+
     const { usuariosid } = decoded;
 
+    // 🔥 Consultamos la base de datos
     const result = await pool.query(
       "SELECT * FROM public.usuarios WHERE usuariosid = $1",
       [usuariosid]
@@ -34,25 +35,30 @@ export const verifyToken = async (req, res, next) => {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    req.usuariosid = usuariosid;
-    req.userEmail = result.rows[0].email;  // 🔥 🔥 Esto es clave
-    req.rol = result.rows[0].rol;          // 🔥 También para roles
+    const usuario = result.rows[0];
+
+    // Guardamos los datos del usuario en req
+    req.usuariosid = usuario.usuariosid;
+    req.userEmail = usuario.email;
+    req.rol = usuario.rol;
 
     next();
-
   } catch (error) {
     console.error("❌ Error en verificación de token:", error.message);
     return res.status(401).json({ message: "Token inválido o expirado" });
   }
 };
+
 export const authorizeRoles = (rolesPermitidos) => {
   return (req, res, next) => {
-    
-    const userRole =  req.rol 
+    const userRole = req.rol;
 
     if (!rolesPermitidos.includes(userRole)) {
-      return res.status(403).json({ message: "Acceso no autorizado: rol insuficiente" });
+      return res
+        .status(403)
+        .json({ message: "Acceso no autorizado: rol insuficiente" });
     }
+
     next();
   };
 };
