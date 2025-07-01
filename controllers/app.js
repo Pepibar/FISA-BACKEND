@@ -2,20 +2,20 @@ import axios from 'axios';
 import pool from "../neon.js";
 import enviarMail from '../emails.js';
 
-const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo2";
+const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo2"; // Verifica que sea correcto
 
 async function crearSolicitud(req, res) {
   try {
     console.log("📩 Solicitud recibida:", req.body);
 
     const {
-      monto,
-      plazomeses,
+      monto_prestamo,
+      plazo_meses,
       edad,
-      ingresos,
-      tipodeingresos,
-      añosexp,
-      deudasmensuales,
+      ingresos_mensuales,
+      tipo_ingreso,
+      años_trabajando,
+      deudas_mensuales,
       mora_total,
       deuda_total,
       tuvo_atrasos,
@@ -23,13 +23,13 @@ async function crearSolicitud(req, res) {
 
     // ✅ Verificación de datos
     if (
-      !monto ||
-      !plazomeses ||
+      !monto_prestamo ||
+      !plazo_meses ||
       !edad ||
-      !ingresos ||
-      !tipodeingresos ||
-      añosexp === undefined ||
-      deudasmensuales === undefined ||
+      !ingresos_mensuales ||
+      !tipo_ingreso ||
+      años_trabajando === undefined ||
+      deudas_mensuales === undefined ||
       mora_total === undefined ||
       deuda_total === undefined ||
       tuvo_atrasos === undefined
@@ -41,53 +41,55 @@ async function crearSolicitud(req, res) {
     const emailUsuario = req.userEmail;
 
     const datosParaIA = {
-      ingresos_mensuales: ingresos,
-      deudas_mensuales: deudasmensuales,
-      monto_prestamo: monto,
-      plazo_meses: plazomeses,
-      edad: edad,
-      tipo_ingreso: tipodeingresos,
-      años_trabajando: añosexp,
-      mora_total: mora_total,
-      deuda_total: deuda_total,
-      tuvo_atrasos: tuvo_atrasos,
+      ingresos_mensuales,
+      deudas_mensuales,
+      monto_prestamo,
+      plazo_meses,
+      edad,
+      tipo_ingreso,
+      años_trabajando,
+      mora_total,
+      deuda_total,
+      tuvo_atrasos,
     };
 
-   const responseIA = await axios.post(IA_URL, datosParaIA);
+    // 🔗 Conexión a la IA
+    const responseIA = await axios.post(IA_URL, datosParaIA);
 
     const apto = responseIA.data.resultado;
     const mensaje = responseIA.data.mensaje;
     console.log("✅ Respuesta IA:", responseIA.data);
 
+    // ✅ Guardar en la base de datos
     const query = `
       INSERT INTO public.solicitudesprestamos (
-        monto,
-        plazomeses,
+        monto_prestamo,
+        plazo_meses,
         usuariosid,
         edad,
-        ingresos,
-        tipodeingresos,
-        añosexp,
-        deudasmensuales,
+        ingresos_mensuales,
+        tipo_ingreso,
+        años_trabajando,
+        deudas_mensuales,
         mora_total,
         deuda_total,
         tuvo_atrasos,
         mensaje,
         apto
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
     `;
 
     const values = [
-      monto,
-      plazomeses,
+      monto_prestamo,
+      plazo_meses,
       usuariosid,
       edad,
-      ingresos,
-      tipodeingresos,
-      añosexp,
-      deudasmensuales,
+      ingresos_mensuales,
+      tipo_ingreso,
+      años_trabajando,
+      deudas_mensuales,
       mora_total,
       deuda_total,
       tuvo_atrasos,
@@ -103,7 +105,7 @@ async function crearSolicitud(req, res) {
       return res.status(400).json({ error: "Email del usuario inválido o no definido" });
     }
 
-    // ✅ Email con nuevo formato
+    // ✅ Email con formato pro
     const contenidoHTML = `
   <div style="
     font-family: Arial, sans-serif;
@@ -125,15 +127,15 @@ async function crearSolicitud(req, res) {
 
     <h3 style="color: #A259FF; font-size: 24px; margin-bottom: 15px;">📄 Detalles de tu solicitud:</h3>
     <ul style="font-size: 18px; padding-left: 25px; margin-bottom: 30px;">
-      <li><strong>Monto solicitado:</strong> $${monto}</li>
-      <li><strong>Plazo:</strong> ${plazomeses} meses</li>
-      <li><strong>Ingresos mensuales:</strong> $${ingresos}</li>
-      <li><strong>Deudas mensuales:</strong> $${deudasmensuales}</li>
+      <li><strong>Monto solicitado:</strong> $${monto_prestamo}</li>
+      <li><strong>Plazo:</strong> ${plazo_meses} meses</li>
+      <li><strong>Ingresos mensuales:</strong> $${ingresos_mensuales}</li>
+      <li><strong>Deudas mensuales:</strong> $${deudas_mensuales}</li>
       <li><strong>Mora total:</strong> $${mora_total}</li>
       <li><strong>Deuda total:</strong> $${deuda_total}</li>
       <li><strong>Tuvo atrasos:</strong> ${tuvo_atrasos ? "Sí" : "No"}</li>
-      <li><strong>Tipo de ingreso:</strong> ${tipodeingresos}</li>
-      <li><strong>Años de experiencia laboral:</strong> ${añosexp}</li>
+      <li><strong>Tipo de ingreso:</strong> ${tipo_ingreso}</li>
+      <li><strong>Años de experiencia laboral:</strong> ${años_trabajando}</li>
       <li><strong>Edad:</strong> ${edad} años</li>
     </ul>
 
