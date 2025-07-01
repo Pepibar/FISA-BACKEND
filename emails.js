@@ -1,31 +1,26 @@
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-dotenv.config();
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,      
-  port: process.env.SMTP_PORT,       
-  secure: false,                     
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false,
   auth: {
-    user: process.env.SMTP_USER,    
-    pass: process.env.SMTP_PASS,    
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
-async function enviarMail({ to, subject, html }) {
+async function enviarMail(to, subject, text) {
+  if (!to) throw new Error("No se especificó destinatario");
+
   const mailOptions = {
-    from: `"FISA App" <${process.env.SMTP_USER}>`,
-    to, // Cambia por el email del destinatario
-    subject,
-    html,
+    from: `"FISA" <${process.env.SMTP_USER}>`,
+    to: to,
+    subject: subject,
+    text: text,
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email enviado:", info.messageId);
-  } catch (error) {
-    console.error("Error enviando email:", error);
-  }
+  return transporter.sendMail(mailOptions);
 }
 
 export default enviarMail;
