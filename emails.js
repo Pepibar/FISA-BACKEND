@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 async function enviarMail({ to, subject, html }) {
   const mailOptions = {
     from: `"FISA App" <${process.env.SMTP_USER}>`,
-    to,
+    to, // Cambia por el email del destinatario
     subject,
     html,
   };
