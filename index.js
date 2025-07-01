@@ -23,8 +23,12 @@ app.get('/admin/dashboard', verifyToken, authorizeRoles(['admin']), (req, res) =
 
 app.get('/solicitudeshechas', verifyToken, authorizeRoles(['usuario', 'admin']), service.getSolicitudesByUsuarioId);
 
+
 app.get('/', (req, res) => {
   res.send('API de FISA funcionando correctamente ✅');
 });
+//son rutas inutiles para evitar errores de favicon 
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+app.get('/favicon.png', (req, res) => res.status(204).end());
 
 export default app;

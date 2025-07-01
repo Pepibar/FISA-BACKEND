@@ -10,14 +10,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function enviarMail(to, subject, text) {
+async function enviarMail(to, subject, html) {
   if (!to) throw new Error("No se especificó destinatario");
 
   const mailOptions = {
     from: `"FISA" <${process.env.SMTP_USER}>`,
     to: to,
     subject: subject,
-    text: text,
+      html: contenidoHTML,
   };
 
   return transporter.sendMail(mailOptions);
