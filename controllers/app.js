@@ -63,19 +63,20 @@ async function crearSolicitud(req, res) {
     // ✅ Guardar en la base de datos
     const query = `
       INSERT INTO public.solicitudesprestamos (
-        monto_prestamo,
-        plazo_meses,
-        usuariosid,
-        edad,
-        ingresos_mensuales,
-        tipo_ingreso,
-        años_trabajando,
-        deudas_mensuales,
-        mora_total,
-        deuda_total,
-        tuvo_atrasos,
-        mensaje,
-        apto
+         monto,
+      plazomeses,
+      usuariosid,
+      edad,
+      ingresos,
+      tipodeingresos,
+      añosexp,
+      deudasmensuales,
+      mora_total,
+      deuda_total,
+      tuvo_atrasos,
+      historialcrediticio || "No informado",
+      mensaje,
+      apto,
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
