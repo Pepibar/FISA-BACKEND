@@ -2,7 +2,7 @@ import axios from 'axios';
 import pool from "../neon.js";
 import enviarMail from '../emails.js';
 
-const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo";
+const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo2";
 
 async function crearSolicitud(req, res) {
   try {
@@ -11,23 +11,28 @@ async function crearSolicitud(req, res) {
     const {
       monto,
       plazomeses,
-      historialcrediticio,
       edad,
       ingresos,
       tipodeingresos,
       añosexp,
       deudasmensuales,
+      mora_total,
+      deuda_total,
+      tuvo_atrasos,
     } = req.body;
 
+    // ✅ Verificación de datos
     if (
       !monto ||
       !plazomeses ||
-      !historialcrediticio ||
       !edad ||
       !ingresos ||
       !tipodeingresos ||
-      !añosexp ||
-      !deudasmensuales
+      añosexp === undefined ||
+      deudasmensuales === undefined ||
+      mora_total === undefined ||
+      deuda_total === undefined ||
+      tuvo_atrasos === undefined
     ) {
       return res.status(400).json({ error: "Faltan datos en la solicitud" });
     }
@@ -36,7 +41,6 @@ async function crearSolicitud(req, res) {
     const emailUsuario = req.userEmail;
 
     const datosParaIA = {
-      historial_crediticio: historialcrediticio,
       ingresos_mensuales: ingresos,
       deudas_mensuales: deudasmensuales,
       monto_prestamo: monto,
@@ -44,48 +48,49 @@ async function crearSolicitud(req, res) {
       edad: edad,
       tipo_ingreso: tipodeingresos,
       años_trabajando: añosexp,
+      mora_total: mora_total,
+      deuda_total: deuda_total,
+      tuvo_atrasos: tuvo_atrasos,
     };
 
-    let apto = false;
-    let mensaje = "Resultado simulado: IA no disponible.";
+   const responseIA = await axios.post(IA_URL, datosParaIA);
 
-    try {
-      const responseIA = await axios.post(IA_URL, datosParaIA);
-      apto = responseIA.data.resultado;
-      mensaje = responseIA.data.mensaje;
-      console.log("✅ Respuesta IA:", responseIA.data);
-    } catch (error) {
-      console.warn("⚠️ IA no disponible, usando resultado simulado");
-    }
+    const apto = responseIA.data.resultado;
+    const mensaje = responseIA.data.mensaje;
+    console.log("✅ Respuesta IA:", responseIA.data);
 
     const query = `
       INSERT INTO public.solicitudesprestamos (
         monto,
         plazomeses,
-        historialcrediticio,
         usuariosid,
         edad,
         ingresos,
         tipodeingresos,
         añosexp,
         deudasmensuales,
+        mora_total,
+        deuda_total,
+        tuvo_atrasos,
         mensaje,
         apto
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *;
     `;
 
     const values = [
       monto,
       plazomeses,
-      historialcrediticio,
       usuariosid,
       edad,
       ingresos,
       tipodeingresos,
       añosexp,
       deudasmensuales,
+      mora_total,
+      deuda_total,
+      tuvo_atrasos,
       mensaje,
       apto,
     ];
@@ -98,17 +103,18 @@ async function crearSolicitud(req, res) {
       return res.status(400).json({ error: "Email del usuario inválido o no definido" });
     }
 
+    // ✅ Email con nuevo formato
     const contenidoHTML = `
   <div style="
     font-family: Arial, sans-serif;
     padding: 30px;
     background-color: #fff;
-    border: 4px solid #A259FF; /* marco lila */
+    border: 4px solid #A259FF;
     border-radius: 12px;
     max-width: 650px;
     margin: 20px auto;
     color: #333;
-    font-size: 18px; /* texto más grande */
+    font-size: 18px;
     line-height: 1.6;
   ">
     <h2 style="color: #A259FF; font-size: 28px; margin-bottom: 20px;">Hola 👋</h2>
@@ -123,7 +129,9 @@ async function crearSolicitud(req, res) {
       <li><strong>Plazo:</strong> ${plazomeses} meses</li>
       <li><strong>Ingresos mensuales:</strong> $${ingresos}</li>
       <li><strong>Deudas mensuales:</strong> $${deudasmensuales}</li>
-      <li><strong>Historial crediticio:</strong> ${historialcrediticio}</li>
+      <li><strong>Mora total:</strong> $${mora_total}</li>
+      <li><strong>Deuda total:</strong> $${deuda_total}</li>
+      <li><strong>Tuvo atrasos:</strong> ${tuvo_atrasos ? "Sí" : "No"}</li>
       <li><strong>Tipo de ingreso:</strong> ${tipodeingresos}</li>
       <li><strong>Años de experiencia laboral:</strong> ${añosexp}</li>
       <li><strong>Edad:</strong> ${edad} años</li>
@@ -136,6 +144,7 @@ async function crearSolicitud(req, res) {
     <p style="font-size: 16px; color: #777;">FISA - Financial Intelligence for Smart Approval</p>
   </div>
 `;
+
     await enviarMail(emailUsuario, "Resultado de tu solicitud de préstamo - FISA", contenidoHTML);
 
     console.log("📧 Email enviado a:", emailUsuario);
