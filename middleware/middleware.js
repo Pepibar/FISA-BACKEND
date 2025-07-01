@@ -1,3 +1,10 @@
+import jwt from "jsonwebtoken";
+import pool from "../neon.js";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+
 export const verifyToken = async (req, res, next) => {
   const header_token = req.headers["authorization"];
   console.log("🔐 Token recibido:", header_token);
