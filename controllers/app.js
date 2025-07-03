@@ -18,7 +18,7 @@ async function crearSolicitud(req, res) {
       deudasmensuales,
       mora_total,
       deuda_total,
-      tuvo_atrasos,
+      tuvo_atrasos
     } = req.body;
 
     // ✅ Validación de datos
@@ -94,7 +94,7 @@ async function crearSolicitud(req, res) {
       deuda_total,
       tuvo_atrasos,
       mensaje,
-      apto,
+      apto
     ];
 
     const resultado = await pool.query(query, values);
