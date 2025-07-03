@@ -18,21 +18,14 @@ async function crearSolicitud(req, res) {
       deudasmensuales,
       mora_total,
       deuda_total,
-      tuvo_atrasos
+      tuvo_atrasos,
     } = req.body;
 
-    // ✅ Validación de datos
+    // Validación
     if (
-      !monto ||
-      !plazomeses ||
-      !edad ||
-      !ingresos ||
-      !tipodeingresos ||
-      añosexp === undefined ||
-      deudasmensuales === undefined ||
-      mora_total === undefined ||
-      deuda_total === undefined ||
-      tuvo_atrasos === undefined
+      !monto || !plazomeses || !edad || !ingresos || !tipodeingresos ||
+      añosexp === undefined || deudasmensuales === undefined ||
+      mora_total === undefined || deuda_total === undefined || tuvo_atrasos === undefined
     ) {
       return res.status(400).json({ error: "Faltan datos en la solicitud" });
     }
@@ -40,7 +33,6 @@ async function crearSolicitud(req, res) {
     const usuariosid = req.usuariosid;
     const emailUsuario = req.userEmail;
 
-    // 🔗 Datos para la IA
     const datosParaIA = {
       ingresos_mensuales: ingresos,
       deudas_mensuales: deudasmensuales,
@@ -60,7 +52,6 @@ async function crearSolicitud(req, res) {
     const mensaje = responseIA.data.mensaje;
     console.log("✅ Respuesta IA:", responseIA.data);
 
-    // ✅ Guardar en la base de datos
     const query = `
       INSERT INTO public.solicitudesprestamos (
         monto,
@@ -68,16 +59,16 @@ async function crearSolicitud(req, res) {
         usuariosid,
         edad,
         ingresos,
-        tipodeingresos,
         añosexp,
+        tipodeingresos,
         deudasmensuales,
+        mensaje,
+        apto,
         mora_total,
         deuda_total,
-        tuvo_atrasos,
-        mensaje,
-        apto
+        tuvo_atrasos
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
     `;
 
@@ -87,61 +78,56 @@ async function crearSolicitud(req, res) {
       usuariosid,
       edad,
       ingresos,
-      tipodeingresos,
       añosexp,
+      tipodeingresos,
       deudasmensuales,
+      mensaje,
+      apto,
       mora_total,
       deuda_total,
-      tuvo_atrasos,
-      mensaje,
-      apto
+      tuvo_atrasos
     ];
+
+    // 🔍 Debug de la query
+    console.log("🧪 QUERY:", query);
+    console.log("🧪 VALUES:", values);
+    console.log("🧮 Cantidad de columnas:", query.match(/\$\d+/g)?.length, "| Valores:", values.length);
 
     const resultado = await pool.query(query, values);
 
-    console.log("Email para enviar:", emailUsuario);
+    // Enviar mail
+    if (!emailUsuario || typeof emailUsuario !== "string" || emailUsuario.trim() === "") {
+      return res.status(400).json({ error: "Email del usuario inválido" });
+    }
 
     const contenidoHTML = `
-    <div style="
-      font-family: Arial, sans-serif;
-      padding: 30px;
-      background-color: #fff;
-      border: 4px solid #A259FF;
-      border-radius: 12px;
-      max-width: 650px;
-      margin: 20px auto;
-      color: #333;
-      font-size: 18px;
-      line-height: 1.6;
-    ">
-      <h2 style="color: #A259FF; font-size: 28px;">Hola 👋</h2>
-      <p style="font-size: 20px;">Tu solicitud fue procesada.</p>
-      <p><strong>Resultado:</strong> ${apto ? "✅ Aprobada" : "❌ No Aprobada"}</p>
-      <p><strong>Motivo:</strong> ${mensaje}</p>
-      <h3 style="color: #A259FF;">📄 Detalles:</h3>
-      <ul>
-        <li><strong>Monto:</strong> $${monto}</li>
-        <li><strong>Plazo:</strong> ${plazomeses} meses</li>
-        <li><strong>Ingresos:</strong> $${ingresos}</li>
-        <li><strong>Deudas:</strong> $${deudasmensuales}</li>
-        <li><strong>Mora total:</strong> $${mora_total}</li>
-        <li><strong>Deuda total:</strong> $${deuda_total}</li>
-        <li><strong>Tuvo atrasos:</strong> ${tuvo_atrasos ? "Sí" : "No"}</li>
-        <li><strong>Tipo de ingreso:</strong> ${tipodeingresos}</li>
-        <li><strong>Años trabajando:</strong> ${añosexp}</li>
-        <li><strong>Edad:</strong> ${edad}</li>
-      </ul>
-      <p>Gracias por confiar en <strong>FISA</strong>.</p>
-    </div>`;
+      <div style="font-family: Arial; padding: 20px;">
+        <h2>Hola 👋</h2>
+        <p>Tu solicitud fue procesada.</p>
+        <p><strong>Resultado:</strong> ${apto ? "✅ Aprobada" : "❌ No Aprobada"}</p>
+        <p><strong>Motivo:</strong> ${mensaje}</p>
+        <ul>
+          <li>Monto: $${monto}</li>
+          <li>Plazo: ${plazomeses} meses</li>
+          <li>Ingresos: $${ingresos}</li>
+          <li>Deudas: $${deudasmensuales}</li>
+          <li>Mora total: $${mora_total}</li>
+          <li>Deuda total: $${deuda_total}</li>
+          <li>Tuvo atrasos: ${tuvo_atrasos ? "Sí" : "No"}</li>
+          <li>Tipo ingreso: ${tipodeingresos}</li>
+          <li>Años exp: ${añosexp}</li>
+          <li>Edad: ${edad}</li>
+        </ul>
+        <p>Gracias por confiar en <strong>FISA</strong>.</p>
+      </div>`;
 
     await enviarMail(emailUsuario, "Resultado de tu solicitud - FISA", contenidoHTML);
-
     console.log("📧 Email enviado a:", emailUsuario);
 
     res.status(201).json({
       mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
-      resultadoIA: { resultado: apto, mensaje },
+      resultadoIA: { resultado: apto, mensaje }
     });
 
   } catch (error) {
@@ -150,8 +136,5 @@ async function crearSolicitud(req, res) {
   }
 }
 
-const solicitudes = {
-  crearSolicitud,
-};
-
+const solicitudes = { crearSolicitud };
 export default solicitudes;
