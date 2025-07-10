@@ -89,41 +89,7 @@ async function crearSolicitud(req, res) {
     ];
 
     // 🔍 Debug de la query
-    console.log("🧪 QUERY:", query);
-    console.log("🧪 VALUES:", values);
-    console.log("🧮 Cantidad de columnas:", query.match(/\$\d+/g)?.length, "| Valores:", values.length);
-
-    const resultado = await pool.query(query, values);
-
-    // Enviar mail
-    if (!emailUsuario || typeof emailUsuario !== "string" || emailUsuario.trim() === "") {
-      return res.status(400).json({ error: "Email del usuario inválido" });
-    }
-
-    const contenidoHTML = `
-      <div style="font-family: Arial; padding: 20px;">
-        <h2>Hola 👋</h2>
-        <p>Tu solicitud fue procesada.</p>
-        <p><strong>Resultado:</strong> ${apto ? "✅ Aprobada" : "❌ No Aprobada"}</p>
-        <p><strong>Motivo:</strong> ${mensaje}</p>
-        <ul>
-          <li>Monto: $${monto}</li>
-          <li>Plazo: ${plazomeses} meses</li>
-          <li>Ingresos: $${ingresos}</li>
-          <li>Deudas: $${deudasmensuales}</li>
-          <li>Mora total: $${mora_total}</li>
-          <li>Deuda total: $${deuda_total}</li>
-          <li>Tuvo atrasos: ${tuvo_atrasos ? "Sí" : "No"}</li>
-          <li>Tipo ingreso: ${tipodeingresos}</li>
-          <li>Años exp: ${añosexp}</li>
-          <li>Edad: ${edad}</li>
-        </ul>
-        <p>Gracias por confiar en <strong>FISA</strong>.</p>
-      </div>`;
-
-    await enviarMail(emailUsuario, "Resultado de tu solicitud - FISA", contenidoHTML);
-    console.log("📧 Email enviado a:", emailUsuario);
-
+   
     res.status(201).json({
       mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
