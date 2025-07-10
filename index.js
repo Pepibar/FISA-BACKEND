@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post('/solicitudes', verifyToken, authorizeRoles(['usuario', 'admin']), solicitudes.crearSolicitud);
+app.post('/solicitudes', solicitudes.crearSolicitud);
 
 app.post('/forgetpassword', usuario.forgetpassword);
 app.post('/register', usuario.register);
