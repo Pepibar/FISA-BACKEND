@@ -89,7 +89,14 @@ async function crearSolicitud(req, res) {
     ];
 
     // 🔍 Debug de la query
-   
+    console.log("🧪 QUERY:", query);
+    console.log("🧪 VALUES:", values);
+    console.log("🧮 Cantidad de columnas:", query.match(/\$\d+/g)?.length, "| Valores:", values.length);
+
+    const resultado = await pool.query(query, values);
+
+    
+
     res.status(201).json({
       mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
