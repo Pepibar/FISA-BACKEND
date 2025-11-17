@@ -1,6 +1,7 @@
 import axios from 'axios';
 import pool from "../neon.js";
 import enviarMail from '../emails.js';
+import { obtenerTasaBCRA } from "../bcra.js";
 
 const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo2";
 
@@ -21,7 +22,7 @@ async function crearSolicitud(req, res) {
       tuvo_atrasos,
     } = req.body;
 
-    // Validación
+    // Validación de campos requeridos
     if (
       !monto || !plazomeses || !edad || !ingresos || !tipodeingresos ||
       añosexp === undefined || deudasmensuales === undefined ||
@@ -33,7 +34,10 @@ async function crearSolicitud(req, res) {
     const usuariosid = req.usuariosid;
     const emailUsuario = req.userEmail;
 
-    // Datos que se envían a la IA
+    // ------------------------------
+    // 1) Preparar datos para IA
+    // ------------------------------
+
     const datosParaIA = {
       ingresos_mensuales: ingresos,
       deudas_mensuales: deudasmensuales,
@@ -47,18 +51,32 @@ async function crearSolicitud(req, res) {
       tuvo_atrasos,
     };
 
-    // Llamada a la IA
+    console.log("📤 Enviando a la IA:", datosParaIA);
+
+    // ------------------------------
+    // 2) Llamada a IA
+    // ------------------------------
+
     const responseIA = await axios.post(IA_URL, datosParaIA);
 
     const apto = responseIA.data.resultado;
     const mensaje = responseIA.data.mensaje;
-
-    // 🔥 AGREGADO NUEVO: ahora también guardamos los detalles
-    const detalles = responseIA.data.detalles;
+    const detalles = responseIA.data.detalles || null;
+    const sugerencias = responseIA.data.sugerencias || null;
 
     console.log("✅ Respuesta IA:", responseIA.data);
 
-    // Guardar en base de datos
+    // ------------------------------
+    // 3) Obtener tasa del BCRA
+    // ------------------------------
+
+    const tasaBCRA = await obtenerTasaBCRA();
+    console.log("🏦 Tasa BCRA:", tasaBCRA);
+
+    // ------------------------------
+    // 4) Guardar en BD
+    // ------------------------------
+
     const query = `
       INSERT INTO public.solicitudesprestamos (
         monto,
@@ -73,9 +91,11 @@ async function crearSolicitud(req, res) {
         apto,
         mora_total,
         deuda_total,
-        tuvo_atrasos
+        tuvo_atrasos,
+        detalles,
+        sugerencias
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *;
     `;
 
@@ -92,23 +112,26 @@ async function crearSolicitud(req, res) {
       apto,
       mora_total,
       deuda_total,
-      tuvo_atrasos
+      tuvo_atrasos,
+      detalles,
+      sugerencias
     ];
-
-    console.log("🧪 QUERY:", query);
-    console.log("🧪 VALUES:", values);
-    console.log("🧮 Cantidad de columnas:", query.match(/\$\d+/g)?.length, "| Valores:", values.length);
 
     const resultado = await pool.query(query, values);
 
-    // 🔥 ACÁ SE AGREGA LO NUEVO QUE QUERÍAS
+    // ------------------------------
+    // 5) Respuesta al front
+    // ------------------------------
+
     res.status(201).json({
       mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
       resultadoIA: {
         resultado: apto,
         mensaje,
-        detalles  // ← DETALLES ACTIVADO
+        detalles,
+        sugerencias,
+        tasaBCRA
       }
     });
 
