@@ -33,6 +33,7 @@ async function crearSolicitud(req, res) {
     const usuariosid = req.usuariosid;
     const emailUsuario = req.userEmail;
 
+    // Datos que se envían a la IA
     const datosParaIA = {
       ingresos_mensuales: ingresos,
       deudas_mensuales: deudasmensuales,
@@ -46,12 +47,18 @@ async function crearSolicitud(req, res) {
       tuvo_atrasos,
     };
 
+    // Llamada a la IA
     const responseIA = await axios.post(IA_URL, datosParaIA);
 
     const apto = responseIA.data.resultado;
     const mensaje = responseIA.data.mensaje;
+
+    // 🔥 AGREGADO NUEVO: ahora también guardamos los detalles
+    const detalles = responseIA.data.detalles;
+
     console.log("✅ Respuesta IA:", responseIA.data);
 
+    // Guardar en base de datos
     const query = `
       INSERT INTO public.solicitudesprestamos (
         monto,
@@ -88,19 +95,21 @@ async function crearSolicitud(req, res) {
       tuvo_atrasos
     ];
 
-    // 🔍 Debug de la query
     console.log("🧪 QUERY:", query);
     console.log("🧪 VALUES:", values);
     console.log("🧮 Cantidad de columnas:", query.match(/\$\d+/g)?.length, "| Valores:", values.length);
 
     const resultado = await pool.query(query, values);
 
-    
-
+    // 🔥 ACÁ SE AGREGA LO NUEVO QUE QUERÍAS
     res.status(201).json({
       mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
-      resultadoIA: { resultado: apto, mensaje }
+      resultadoIA: {
+        resultado: apto,
+        mensaje,
+        detalles  // ← DETALLES ACTIVADO
+      }
     });
 
   } catch (error) {
