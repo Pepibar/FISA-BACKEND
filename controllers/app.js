@@ -1,7 +1,6 @@
 import axios from 'axios';
 import pool from "../neon.js";
 import enviarMail from '../emails.js';
-import { obtenerTasaBCRA } from '../utiles/brc.js';
 
 const IA_URL = "https://proyecto-ia-fisa.onrender.com/prestamo2";
 
@@ -22,7 +21,7 @@ async function crearSolicitud(req, res) {
       tuvo_atrasos,
     } = req.body;
 
-    // Validación de campos requeridos
+    // Validación
     if (
       !monto || !plazomeses || !edad || !ingresos || !tipodeingresos ||
       añosexp === undefined || deudasmensuales === undefined ||
@@ -33,10 +32,6 @@ async function crearSolicitud(req, res) {
 
     const usuariosid = req.usuariosid;
     const emailUsuario = req.userEmail;
-
-    // ------------------------------
-    // 1) Preparar datos para IA
-    // ------------------------------
 
     const datosParaIA = {
       ingresos_mensuales: ingresos,
@@ -51,31 +46,11 @@ async function crearSolicitud(req, res) {
       tuvo_atrasos,
     };
 
-    console.log("📤 Enviando a la IA:", datosParaIA);
-
-    // ------------------------------
-    // 2) Llamada a IA
-    // ------------------------------
-
     const responseIA = await axios.post(IA_URL, datosParaIA);
 
     const apto = responseIA.data.resultado;
     const mensaje = responseIA.data.mensaje;
-    const detalles = responseIA.data.detalles || null;
-    const sugerencias = responseIA.data.sugerencias || null;
-
     console.log("✅ Respuesta IA:", responseIA.data);
-
-    // ------------------------------
-    // 3) Obtener tasa del BCRA
-    // ------------------------------
-
-    const tasaBCRA = await obtenerTasaBCRA();
-    console.log("🏦 Tasa BCRA:", tasaBCRA);
-
-    // ------------------------------
-    // 4) Guardar en BD
-    // ------------------------------
 
     const query = `
       INSERT INTO public.solicitudesprestamos (
@@ -91,11 +66,9 @@ async function crearSolicitud(req, res) {
         apto,
         mora_total,
         deuda_total,
-        tuvo_atrasos,
-        detalles,
-        sugerencias
+        tuvo_atrasos
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       RETURNING *;
     `;
 
@@ -112,27 +85,22 @@ async function crearSolicitud(req, res) {
       apto,
       mora_total,
       deuda_total,
-      tuvo_atrasos,
-      detalles,
-      sugerencias
+      tuvo_atrasos
     ];
+
+    // 🔍 Debug de la query
+    console.log("🧪 QUERY:", query);
+    console.log("🧪 VALUES:", values);
+    console.log("🧮 Cantidad de columnas:", query.match(/\$\d+/g)?.length, "| Valores:", values.length);
 
     const resultado = await pool.query(query, values);
 
-    // ------------------------------
-    // 5) Respuesta al front
-    // ------------------------------
+    
 
     res.status(201).json({
       mensaje: "Solicitud creada correctamente",
       solicitud: resultado.rows[0],
-      resultadoIA: {
-        resultado: apto,
-        mensaje,
-        detalles,
-        sugerencias,
-        tasaBCRA
-      }
+      resultadoIA: { resultado: apto, mensaje }
     });
 
   } catch (error) {
