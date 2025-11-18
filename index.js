@@ -4,7 +4,11 @@ import solicitudes from './controllers/app.js';
 import usuario from './controllers/login.js';
 import { verifyToken, authorizeRoles } from './middleware/middleware.js';
 import service from './controllers/services.js';
+import https from "https";
 
+const agent = new https.Agent({
+  rejectUnauthorized: false
+});
 
 
 
