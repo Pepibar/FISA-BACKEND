@@ -4,15 +4,15 @@ import solicitudes from './controllers/app.js';
 import usuario from './controllers/login.js';
 import { verifyToken, authorizeRoles } from './middleware/middleware.js';
 import service from './controllers/services.js';
+import axios from "axios";
 import https from "https";
 
-const agent = new https.Agent({
-  rejectUnauthorized: false
-});
 
 
 
-const app = express();+
+const app = express();
+
+
 
 app.get("/bcra", async (req, res) => {
   try {
@@ -22,17 +22,19 @@ app.get("/bcra", async (req, res) => {
       "Authorization": "Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODA2ODUyMjcsInR5cGUiOiJleHRlcm5hbCIsInVzZXIiOiJwbGF5bWFydHUxOEBnbWFpbC5jb20ifQ.uFWlbUryqQJYCnelGF9amd-y6R7Qdkq02JRR4lo-s-3q9fNjAao680gthXrnk_QqHySzIQenulsfHnfq-pncWg"
     };
 
-    const response = await fetch(url, { headers });
+    // ⭐ IMPORTANTE — axios SI ignora certificados
+    const httpsAgent = new https.Agent({
+      rejectUnauthorized: false
+    });
+
+    const response = await axios.get(url, {
+      headers,
+      httpsAgent
+    });
 
     console.log("🔄 Status BCRA:", response.status);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Error en la respuesta:", errorText);
-      return res.status(500).json({ error: "Error al consultar BCRA" });
-    }
-
-    const datos = await response.json();
+    const datos = response.data;
 
     if (!datos.results || datos.results.length === 0) {
       return res.status(404).json({ error: "No hay datos disponibles" });
@@ -50,6 +52,7 @@ app.get("/bcra", async (req, res) => {
     return res.status(500).json({ error: "Error consultando BCRA" });
   }
 });
+
 
 app.use(cors());
 app.use(express.json());
